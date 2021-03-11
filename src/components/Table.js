@@ -7,7 +7,8 @@ import "./style.css";
 class Table extends Component {
   state = {
     result: [],
-    search: ""
+    search: "",
+    sortOrder: ""
   };
 
   componentDidMount() {
@@ -18,6 +19,7 @@ class Table extends Component {
       }).catch(err => console.log(err))
   };
 
+  // Handles changes to what is being searched; Does not require a button
   handleInputChange = event => {
     if (event.target.name === "search") {
       const value = event.target.value.toLowerCase();
@@ -25,6 +27,26 @@ class Table extends Component {
         search: value
       });
     }
+  };
+
+  // Function to handle sorting by last name. Uses built-in sort() function, whose default value is ascending
+  sortByLastName = () => {
+    const sortedLastName = this.state.result.sort((a, b) => {
+      if (b.name.last > a.name.last) {
+        return -1
+      } else if (a.name.last > b.name.last) {
+        return 1
+      } else {
+        return 0
+      };
+    });
+    if (this.state.sortOrder === "DESC") {
+      sortedLastName.reverse();
+      this.setState({ sortOrder: "ASC"});
+    } else {
+      this.setState({ sortOrder: "DESC"});
+    };
+    this.setState({ result: sortedLastName })
   };
   
   render() {
@@ -37,15 +59,17 @@ class Table extends Component {
             <tr>
               <th>Picture</th>
               <th>First Name</th>
-              <th>Last Name</th>
+              <th>Last Name <span className="arrow" onClick={this.sortByLastName}></span></th>
               <th>Email</th>
               <th>Phone Number</th>
               <th>Date of Birth</th>
             </tr>
           </thead>
 
+          {/* Filters by matching first names */}
           {this.state.result && this.state.result.map(item =>
             item.name.first.toLowerCase().includes(this.state.search) ?
+            // Login key required for each random user
             <tbody key={item.login.uuid}>
               <tr>
                 <td><img src={item.picture.thumbnail} alt="Thumbnail"/></td>
@@ -59,6 +83,7 @@ class Table extends Component {
 
             :
 
+            // Filters by matching last names
             item.name.last.toLowerCase().includes(this.state.search) ?
             <tbody key={item.login.uuid}>
               <tr>
